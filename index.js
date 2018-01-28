@@ -1,73 +1,107 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 class App extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      selected: 0,
-      votes: [0,0,0,0,0,0]
+	constructor(props){
+		super(props)
+		this.state={
+			hyva: 0,
+			neutraali: 0,
+			huono: 0
+		}
+	}
+
+	clikHyva = () => {
+		this.setState({ hyva: this.state.hyva+1})
+	}
+	clickNeutraali = () => {
+		this.setState({ neutraali: this.state.neutraali+1})
+	}
+	clickHuono = () => {
+		this.setState({ huono: this.state.huono+1})
+	}
+
+	buttonClick = (arvo) => {
+		let uusiArvo = this.state[arvo]+1
+		if (arvo === 'hyva') {
+			return () => {
+				this.setState({hyva: uusiArvo})
+				}
+		}
+		if (arvo === 'neutraali') {
+			return () => {
+				this.setState({neutraali: uusiArvo})
+				}
+		}
+		return () => {
+			this.setState( {huono: uusiArvo})
+	    }
     }
-  }
 
-  generateRandomNumber = () => {
-  	const anecdoteNumber = Math.floor(Math.random() * (5 - 0 + 1) +0 );
-  	return () => {
-  		this.setState({selected: anecdoteNumber})
-  	}
-  }
+	render(){
+		
+		let stats = [this.state.hyva,  this.state.neutraali, this.state.huono]
+		
+		return (
+			<div>
+				<h1>Anna Palautetta</h1>
+				<Button handleClick={this.buttonClick('hyva')} text="Hyva" />
+				<Button handleClick={this.clickNeutraali} text="Neutraali" />
+				<Button handleClick={this.clickHuono} text="Huono" />
+				<h2>Statistiikka</h2>
+				<Statistics arvot={stats} />
+			</div>
+			)
+	}
 
-  voteForAnecdote = () => {
-  	let copyOfVotes = this.state.votes
-  	const anecdoteIndex = this.state.selected
-  	copyOfVotes[anecdoteIndex] += 1
-  	return () => {
-  		this.setState({votes: copyOfVotes})
-  	}
-  	}
-
-  	findMostVoted = () => {
-  		const copyOfVotes = this.state.votes
-  		const highestVotes = Math.max(...copyOfVotes)
-  		const highestVotedIndex = copyOfVotes.indexOf(highestVotes)
-  		return highestVotedIndex
-  	}
-
-  render() {
-  	const votes = this.state.votes[this.state.selected]
-  	const highestVoted = this.findMostVoted()
-    return (
-      <div>
-        {this.props.anecdotes[this.state.selected]}
-        <p>Has {votes} votes </p>
-        <button onClick={this.generateRandomNumber()}>
-      	Next anecdote
-	  	</button>
-	  	<button onClick={this.voteForAnecdote()}>
-	  	Vote
-	  	</button>
-	  	<h2>Anecdote with the most votes:</h2>
-	  	{this.props.anecdotes[highestVoted]}
-	  	<p>Has {this.state.votes[highestVoted]} votes </p>
-
-      </div>
-      
-	  
-    )
-  }
 }
 
-const anecdotes = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-]
+const Statistics = (props) => {
+	const hyva = props.arvot[0]
+	const neutraali = props.arvot[1]
+	const huono = props.arvot[2]
+	const keskiarvo = (hyva-huono)/(hyva+neutraali+huono)
+	const positiivisia = hyva/(hyva+neutraali+huono)
+	if (hyva+huono+neutraali === 0){
+		return (
+			<div>
+				<p>Ei yhtaan palautetta annettu </p>
+			</div>
+			)
+	}
+	return(
+		<table>
+			<tbody>
+				<Statistic nimi="Hyva" arvo={hyva} />
+				<Statistic nimi="Neutraali" arvo={neutraali} />
+				<Statistic nimi="Huono" arvo={huono} />
+				<Statistic nimi="Keskiarvo" arvo={keskiarvo} />
+				<Statistic nimi="Positiivisia" arvo={positiivisia} />
+			</tbody>
+		</table>
+		)
+	
+
+}
+
+const Statistic = (props) =>  {
+	return(
+		<tr>
+			<td>{props.nimi} </td>
+			<td> {props.arvo}</td>
+		</tr>
+		)
+}
+
+const Button = ({handleClick,text}) => (
+	<button onClick = {handleClick}>
+		{text}
+	</button>
+
+	)
 
 ReactDOM.render(
-  <App anecdotes={anecdotes} />,
-  document.getElementById('root')
+	<App />,
+	document.getElementById('root')
 )
+
